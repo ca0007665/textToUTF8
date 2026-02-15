@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UTF-8转换器</title>
+    <style>
+        :root {
+            --bg-green: #339933;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            /* font-family: "Consolas", "Noto Sans SC", monospace; */
+            font-family: "Noto Sans SC", monospace;
+        }
+        body {
+            background: var(--bg-green);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        button {
+            background: var(--bg-green);
+            padding: 5px;
+            font-size: 1.1rem;
+            border: 2px solid darkgreen;
+            border-radius: 10px;
+            transition: all 0.3s ease, background-color 0.1s;
+        }
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 5px #00000066;
+        }
+        button:active {
+            background: green;
+        }
+        header {
+            text-align: center;
+            border-bottom: 3px solid var(--bg-green);
+            margin-bottom: 10px;
+        }
+        h2 {
+            /* align-self: start; */
+            width: fit-content;
+            border-bottom: 2px solid var(--bg-green);
+            margin-bottom: 5px;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 10px;
+            font-size: 1.1rem;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: var(--bg-green);
+        }
+        .container {
+            padding: 20px;
+            background: #ffffffcc;
+            width: 100%;
+            max-width: 800px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px #00000066;
+            position: relative;
+            overflow: hidden;
+        }
+        .buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .buttons * {
+            margin-top: 3px;
+            flex-grow: 1;
+        }
+        #outputText {
+            background: #eee;
+            width: 100%;
+            min-height: 200px;
+            padding: 10px;
+            font-size: 1.1rem;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            resize: vertical;
+            overflow-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>UTF-8转换器</h1>
+        </header>
+        <h2>原文/UTF-8编码</h2>
+        <textarea id="inputText" placeholder="请输入文本..."></textarea>
+        <div class="buttons">
+            <button id="encode">编码</button>
+            <button id="decode">解码</button>
+        </div>
+        <h2>结果</h2>
+        <div id="outputText"></div>
+    </div>
+    <script>
+        var pro = false;
+        function checkmode(){
+            const params = new URLSearchParams(window.location.search);
+            const _pro = params.get('pro');
+            pro = (_pro != null);
+        }
+        checkmode();
+        function escapeHTML(str){
+            return str.replace(/[&<>"']/g, function(match){
+                const escapeMap = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+                };
+                return escapeMap[match];
+            });
+        }
+        function textToHex(text){
+            const encoder = new TextEncoder();
+            const bytes = encoder.encode(text);
+            const hexArray = Array.from(bytes, byte => 
+                byte.toString(16).padStart(2, '0')
+            );
+            return hexArray.join('');
+        }
+        function hexToText(hexString){
+            const bytes = new Uint8Array(hexString.length / 2);
+            for (let i = 0; i < hexString.length; i += 2) {
+                bytes[i / 2] = parseInt(hexString.substr(i, 2), 16);
+            }
+            const decoder = new TextDecoder("utf-8");
+            return decoder.decode(bytes);
+        }
+
+        const inputText = document.getElementById("inputText");
+        const outputText = document.getElementById("outputText");
+        const encode = document.getElementById("encode");
+        const decode = document.getElementById("decode");
+
+        encode.addEventListener("click", Encode);
+        decode.addEventListener("click", Decode);
+
+        function Encode(){
+            let input = inputText.value.trim();
+            if(!pro)input = escapeHTML(input);
+            const hexString = textToHex(input);
+            outputText.innerHTML = hexString;
+        }
+        function Decode(){
+            const input = inputText.value.trim();
+            const cleanHex = input.replace(/\s+/g, '');
+            if (!/^[0-9A-Fa-f]+$/.test(cleanHex)) {
+                throw new Error('Illegal character detected.');
+            }
+            if (cleanHex.length % 2 !== 0) {
+                throw new Error('Illegal length.');
+            }   
+            const text = hexToText(cleanHex);
+            outputText.innerHTML = text;
+        }
+    </script>
+</body>
+</html>
