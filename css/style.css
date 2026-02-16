@@ -84,4 +84,5 @@ textarea:focus {
     border-radius: 12px;
     resize: vertical;
     overflow-wrap: break-word;
+    white-space: pre-wrap;
 }
