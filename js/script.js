@@ -18,11 +18,6 @@ function escapeHTML(str){
         return escapeMap[match];
     });
 }
-function escapeEnter(str){
-    return str.replace(/\n/g, function(match){
-        return '<br>';
-    });
-}
 function textToHex(text){
     const encoder = new TextEncoder();
     const bytes = encoder.encode(text);
@@ -51,7 +46,6 @@ decode.addEventListener("click", Decode);
 function Encode(){
     let input = inputText.value.trim();
     if(!pro)input = escapeHTML(input);
-    input = escapeEnter(input);
     const hexString = textToHex(input);
     outputText.innerHTML = hexString;
 }
@@ -66,4 +60,5 @@ function Decode(){
     }   
     const text = hexToText(cleanHex);
     outputText.innerHTML = text;
+
 }
