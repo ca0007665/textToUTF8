@@ -59,6 +59,7 @@ function Decode(){
         throw new Error('Illegal length.');
     }   
     const text = hexToText(cleanHex);
-    outputText.innerHTML = text;
-
+    if(pro) outputText.textContent = text;
+    else outputText.innerHTML = text;
 }
+
