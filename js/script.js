@@ -1,8 +1,9 @@
 // 我是作者
+const lang = document.documentElement.getAttribute("lang");
 var pro = false;
 function checkmode(){
     const params = new URLSearchParams(window.location.search);
-    const _pro = params.get('pro');
+    const _pro = params.get("pro");
     pro = (_pro != null);
 }
 checkmode();
@@ -42,6 +43,7 @@ const decode = document.getElementById("decode");
 
 encode.addEventListener("click", Encode);
 decode.addEventListener("click", Decode);
+outputText.addEventListener("dblclick", Copy);
 
 function Encode(){
     let input = inputText.value.trim();
@@ -53,13 +55,40 @@ function Decode(){
     const input = inputText.value.trim();
     const cleanHex = input.replace(/\s+/g, '');
     if (!/^[0-9A-Fa-f]+$/.test(cleanHex)) {
-        throw new Error('Illegal character detected.');
+        throw new Error("Illegal character detected.");
     }
     if (cleanHex.length % 2 !== 0) {
-        throw new Error('Illegal length.');
+        throw new Error("Illegal length.");
     }   
     const text = hexToText(cleanHex);
     if(pro) outputText.textContent = text;
     else outputText.innerHTML = text;
 }
-
+function hint(text) {
+    let tip = document.createElement("div");
+    tip.textContent = text;
+    tip.style = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #eeeeeecc;
+        color: black;
+        padding: 10px;
+        border-radius: 4px;
+        z-index: 9999
+    `;
+    document.body.appendChild(tip);
+    setTimeout(() => tip.remove(), 2000);
+}
+function Copy(){
+    navigator.clipboard.writeText(outputText.textContent).then(() => {
+        const copy_successful = {
+            "en-us": "Copy successful.",
+            "zh-cn": "复制成功"
+        };
+        hint(copy_successful[lang]);
+    }).catch(err => {
+        hint("Error.");
+    });
+}
